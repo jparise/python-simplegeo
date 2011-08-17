@@ -1,8 +1,8 @@
 import urllib
 
 from simplegeo.util import (json_decode, APIError, SIMPLEGEOHANDLE_RSTR,
-                            is_valid_lat, is_valid_lon,
                             _assert_valid_lat, _assert_valid_lon,
+                            _assert_valid_category,
                             is_valid_ip, is_numeric, is_simplegeohandle)
 from simplegeo.models import Feature
 from simplegeo import Client as ParentClient
@@ -59,12 +59,11 @@ class Client(ParentClient):
         """Search for places near a lat/lon, within a radius (in kilometers)."""
         _assert_valid_lat(lat)
         _assert_valid_lon(lon)
+        _assert_valid_category(category)
         if (radius and not is_numeric(radius)):
             raise ValueError("Radius must be numeric.")
         if (query and not isinstance(query, basestring)):
             raise ValueError("Query must be a string.")
-        if (category and not isinstance(category, basestring)):
-            raise ValueError("Category must be a string.")
         if (num and not is_numeric(num)):
             raise ValueError("Num parameter must be numeric.")
 
@@ -72,6 +71,8 @@ class Client(ParentClient):
             query = query.encode('utf-8')
         if isinstance(category, unicode):
             category = category.encode('utf-8')
+        if isinstance(category, (list, tuple)):
+            category = [s.encode('utf-8') for s in category]
 
         kwargs = { }
         if radius:
@@ -99,14 +100,13 @@ class Client(ParentClient):
         ipaddr and then does the same thing as search(), using that
         guessed latitude and longitude.
         """
+        _assert_valid_category(category)
         if not is_valid_ip(ipaddr):
             raise ValueError("Address %s is not a valid IP" % ipaddr)
         if (radius and not is_numeric(radius)):
             raise ValueError("Radius must be numeric.")
         if (query and not isinstance(query, basestring)):
             raise ValueError("Query must be a string.")
-        if (category and not isinstance(category, basestring)):
-            raise ValueError("Category must be a string.")
         if (num and not is_numeric(num)):
             raise ValueError("Num parameter must be numeric.")
 
@@ -114,6 +114,8 @@ class Client(ParentClient):
             query = query.encode('utf-8')
         if isinstance(category, unicode):
             category = category.encode('utf-8')
+        if isinstance(category, (list, tuple)):
+            category = [s.encode('utf-8') for s in category]
 
         kwargs = { }
         if radius:
@@ -142,12 +144,11 @@ class Client(ParentClient):
         HTTP proxy device between you and the server), and then does
         the same thing as search_by_ip(), using that IP address.
         """
+        _assert_valid_category(category)
         if (radius and not is_numeric(radius)):
             raise ValueError("Radius must be numeric.")
         if (query and not isinstance(query, basestring)):
             raise ValueError("Query must be a string.")
-        if (category and not isinstance(category, basestring)):
-            raise ValueError("Category must be a string.")
         if (num and not is_numeric(num)):
             raise ValueError("Num parameter must be numeric.")
 
@@ -155,6 +156,8 @@ class Client(ParentClient):
             query = query.encode('utf-8')
         if isinstance(category, unicode):
             category = category.encode('utf-8')
+        if isinstance(category, (list, tuple)):
+            category = [s.encode('utf-8') for s in category]
 
         kwargs = { }
         if radius:
@@ -182,14 +185,13 @@ class Client(ParentClient):
         street address and then does the same thing as search(), using
         that deduced latitude and longitude.
         """
+        _assert_valid_category(category)
         if not isinstance(address, basestring) or not address.strip():
             raise ValueError("Address must be a non-empty string.")
         if (radius and not is_numeric(radius)):
             raise ValueError("Radius must be numeric.")
         if (query and not isinstance(query, basestring)):
             raise ValueError("Query must be a string.")
-        if (category and not isinstance(category, basestring)):
-            raise ValueError("Category must be a string.")
         if (num and not is_numeric(num)):
             raise ValueError("Num parameter must be numeric.")
 
@@ -199,6 +201,8 @@ class Client(ParentClient):
             query = query.encode('utf-8')
         if isinstance(category, unicode):
             category = category.encode('utf-8')
+        if isinstance(category, (list, tuple)):
+            category = [s.encode('utf-8') for s in category]
 
         kwargs = { 'address': address }
         if radius:

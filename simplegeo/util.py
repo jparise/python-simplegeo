@@ -32,6 +32,10 @@ def _assert_valid_lon(x, strict=False):
     if not is_valid_lon(x, strict=strict):
         raise ValueError("not a valid lon (strict=%s): %s" % (strict, x,))
 
+def _assert_valid_category(c):
+    if c is not None and not is_valid_category(c):
+        raise ValueError("Category must be a string or sequence of strings.")
+
 def is_valid_lat(x):
     return is_numeric(x) and (x <= 90) and (x >= -90)
 
@@ -55,6 +59,17 @@ def is_valid_lon(x, strict=False):
         return is_numeric(x) and (x <= 180) and (x >= -180)
     else:
         return is_numeric(x) and (x <= 360) and (x >= -360)
+
+def is_valid_category(c):
+    """A category must be a string or a sequence of strings."""
+    if isinstance(c, basestring):
+        return True
+    if isinstance(c, (list, tuple)):
+        for item in c:
+            if not isinstance(item, basestring):
+                return False
+        return True
+    return False
 
 def deep_validate_lat_lon(struc, strict_lon_validation=False):
     """

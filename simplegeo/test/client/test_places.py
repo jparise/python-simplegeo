@@ -307,6 +307,29 @@ class PlacesTest(unittest.TestCase):
         self.assertEqual(mockhttp.method_calls[0][1][0], 'http://api.simplegeo.com:80/%s/places/%s,%s.json?q=monkeys&category=animal' % (API_VERSION, lat, lon))
         self.assertEqual(mockhttp.method_calls[0][1][1], 'GET')
 
+    def test_search_with_multiple_categories(self):
+        rec1 = Feature((D('11.03'), D('10.04')), simplegeohandle='SG_abcdefghijkmlnopqrstuv', properties={'name': "Bob's House Of Monkeys", 'category': "monkey dealership"})
+        rec2 = Feature((D('11.03'), D('10.05')), simplegeohandle='SG_abcdefghijkmlnopqrstuv', properties={'name': "Monkey Food 'R' Us", 'category': "pet food store"})
+
+        mockhttp = mock.Mock()
+        mockhttp.request.return_value = ({'status': '200', 'content-type': 'application/json', }, json.dumps({'type': "FeatureColllection", 'features': [rec1.to_dict(), rec2.to_dict()]}))
+        self.client.places.http = mockhttp
+
+        self.failUnlessRaises(ValueError, self.client.places.search, -91, 100)
+        self.failUnlessRaises(ValueError, self.client.places.search, -81, 361)
+        self.failUnlessRaises(ValueError, self.client.places.search, -0, 0, category=10)
+        self.failUnlessRaises(ValueError, self.client.places.search, -0, 0, category=[10])
+
+        lat = D('11.03')
+        lon = D('10.04')
+        res = self.client.places.search(lat, lon, query='monkeys', category=['animal', 'mineral'])
+        self.failUnless(isinstance(res, (list, tuple)), (repr(res), type(res)))
+        self.failUnlessEqual(len(res), 2)
+        self.failUnless(all(isinstance(f, Feature) for f in res))
+        self.assertEqual(mockhttp.method_calls[0][0], 'request')
+        self.assertEqual(mockhttp.method_calls[0][1][0], 'http://api.simplegeo.com:80/%s/places/%s,%s.json?q=monkeys&category=animal&category=mineral' % (API_VERSION, lat, lon))
+        self.assertEqual(mockhttp.method_calls[0][1][1], 'GET')
+
     def test_search_by_ip_nonascii(self):
         rec1 = Feature((D('11.03'), D('10.04')), simplegeohandle='SG_abcdefghijkmlnopqrstuv', properties={'name': u"Bob's House Of M❤nkeys", 'category': u"m❤nkey dealership"})
         rec2 = Feature((D('11.03'), D('10.05')), simplegeohandle='SG_abcdefghijkmlnopqrstuv', properties={'name': u"M❤nkey Food 'R' Us", 'category': "pet food store"})

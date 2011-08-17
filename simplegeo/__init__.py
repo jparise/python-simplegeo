@@ -122,7 +122,7 @@ class Client(object):
         body = None
         params = {}
         if method == 'GET' and isinstance(data, dict) and len(data) > 0:
-            endpoint = endpoint + '?' + urllib.urlencode(data)
+            endpoint = endpoint + '?' + urllib.urlencode(data, True)
         else:
             if isinstance(data, dict):
                 body = urllib.urlencode(data)
